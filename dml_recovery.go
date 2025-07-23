@@ -45,8 +45,8 @@ const (
 	timePattern = "timestamp"
 	header      = "###   @"
 	//re := regexp.MustCompile(`(?P<name>[a-zA-Z]+)\s+(?P<age>\d+)\s+(?P<email>\w+@\w+(?:\.\w+)+)`)
-	headerStr  = `(?P<pre>###   @%d=)+(?P<value>.*)+\s+(?P<others>/\*.*\*/)`
-	header5Str = `(?P<pre>###   @2=)+(?P<value>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})+\s+(?P<others>/\*.*\*/)`
+	headerStr  = `(?P<pre>###   @%d=)+(?P<value>.*?)(?:\s+(?P<others>/\*.*\*/))?$`
+	header5Str = `(?P<pre>###   @2=)+(?P<value>[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})+(?:\s+(?P<others>/\*.*\*/))?$`
 )
 
 func main() {
@@ -110,6 +110,49 @@ func ConsolePrint(num *int,tchan <-chan time.Time){
     }
 }
 
+// escapeSQLString 转义SQL字符串中的特殊字符
+func escapeSQLString(s string) string {
+	// 替换常见的转义字符
+	s = strings.ReplaceAll(s, "\\", "\\\\")  // 反斜杠
+	s = strings.ReplaceAll(s, "'", "\\'")    // 单引号
+	s = strings.ReplaceAll(s, "\"", "\\\"")  // 双引号
+	s = strings.ReplaceAll(s, "\x00", "\\0") // NULL字符
+	s = strings.ReplaceAll(s, "\n", "\\n")   // 换行
+	s = strings.ReplaceAll(s, "\r", "\\r")   // 回车
+	s = strings.ReplaceAll(s, "\t", "\\t")   // 制表符
+	s = strings.ReplaceAll(s, "\x1a", "\\Z") // Ctrl+Z
+	
+	// 处理\x格式的转义字符
+	re := regexp.MustCompile(`\\x([0-9a-fA-F]{2})`)
+	s = re.ReplaceAllStringFunc(s, func(match string) string {
+		// 提取十六进制值
+		hex := match[2:]
+		if val, err := strconv.ParseInt(hex, 16, 8); err == nil {
+			switch val {
+			case 0:
+				return "\\0"
+			case 10:
+				return "\\n"
+			case 13:
+				return "\\r"
+			case 9:
+				return "\\t"
+			case 26:
+				return "\\Z"
+			default:
+				// 对于其他字符，保持原样或转换为可打印字符
+				if val >= 32 && val <= 126 {
+					return string(rune(val))
+				}
+				return fmt.Sprintf("\\x%02X", val)
+			}
+		}
+		return match
+	})
+	
+	return s
+}
+
 func NewDataStruct(tb *tnameAll) map[string]interface{} {
 	kv = make(map[string]interface{})
 	for _, clm := range tb.columnsort {
@@ -158,13 +201,19 @@ func mapToStringSql(basesql string, mp map[string]interface{}, sortline *tnameAl
 				typecl := sortline.column[cc]
 				//deal with 5.5 binlog datetime fomat 2018-11-22 22:00:00
 				if !checkPattern.MatchString(typecl) && !nullPattern.MatchString(ss) {
-					ss = "'" + ss + "'"
+					ss = "'" + escapeSQLString(ss) + "'"
 					//translate timestamp to datetime and plus  inverted comma;
 				} else if unixPattern.MatchString(typecl) {
 					sss, _ := strconv.Atoi(ss)
 					ss = "'" + time.Unix(int64(sss), 0).Format("2006-01-02 15:04:05") + "'"
 				}
 
+			} else {
+				// 如果已经有引号，也需要转义内容
+				if strings.HasPrefix(ss, "'") && strings.HasSuffix(ss, "'") && len(ss) > 2 {
+					inner := ss[1 : len(ss)-1]
+					ss = "'" + escapeSQLString(inner) + "'"
+				}
 			}
 			//fmt.Printf("%s", ss)
 			fmt.Fprintf(afile, "%s", ss)
@@ -385,7 +434,7 @@ func mapToStringSql2(basesql string, mp map[string]interface{}, sortline *tnameA
 				//deal with 5.5 binlog datetime fomat 2018-11-22 22:00:00
 				if !checkPattern.MatchString(typecl) && !nullPattern.MatchString(ss) {
 					fmt.Fprintf(afile, "%s=", cc)
-					ss = "'" + ss + "'"
+					ss = "'" + escapeSQLString(ss) + "'"
 					//translate timestamp to datetime and plus  inverted comma;
 				} else if nullPattern.MatchString(ss) {
 					if dotnum > 1 {
@@ -404,6 +453,11 @@ func mapToStringSql2(basesql string, mp map[string]interface{}, sortline *tnameA
 
 			} else {
 				fmt.Fprintf(afile, "%s=", cc)
+				// 如果已经有引号，也需要转义内容
+				if strings.HasPrefix(ss, "'") && strings.HasSuffix(ss, "'") && len(ss) > 2 {
+					inner := ss[1 : len(ss)-1]
+					ss = "'" + escapeSQLString(inner) + "'"
+				}
 			}
 			fmt.Fprintf(afile, "%s", ss)
 			if checkIdx(idx, columnNum) {
