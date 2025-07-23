@@ -2,7 +2,12 @@
 
 一个用于从MySQL binlog恢复DELETE和UPDATE操作的Go语言工具。
 
-Fork自 <https://github.com/bai1986/1204>，主要修改：更新正则表达式，增加特殊字符处理，增加文档
+Fork自 <https://github.com/bai1986/1204>，主要修改：
+
+1. 更新正则表达式
+2. 增加特殊字符处理
+3. 增加文档
+4. 增加Github Action及release
 
 ## 功能说明
 
@@ -26,7 +31,7 @@ go build dml_recovery.go
 
 创建表结构文件，格式类似CREATE TABLE语句格式，如：
 
-```
+```mysql
 `video_static`
 `aid` bigint(20)
 `bvid` varchar(50)
