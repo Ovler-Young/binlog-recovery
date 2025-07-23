@@ -1,5 +1,7 @@
 # MySQL Binlog DML Recovery Tool
 
+> 轻松从MySQL binlog文件中恢复已删除或更新的数据
+
 [English](README.md) | [中文](README.CN.md)
 
 一个用于从MySQL binlog恢复DELETE和UPDATE操作的Go语言工具。
@@ -18,14 +20,17 @@ Fork自 <https://github.com/bai1986/1204>，主要修改：
 - **DELETE恢复**：生成INSERT语句来恢复被删除的数据
 - **UPDATE恢复**：生成UPDATE语句来恢复被修改前的数据
 
-## 编译程序 或 从release下载
+## 安装方式
 
-若编译：
+### 选项1: Go安装 (如果本地有Go环境推荐)
 
-```pwsh
-git clone https://github.com/Ovler-Young/binlog-recovery.git
-go build dml_recovery.go
+```bash
+go install github.com/Ovler-Young/binlog-recovery@latest
 ```
+
+### 选项2: 从Release下载 (普通用户推荐)
+
+从 [releases页面](https://github.com/Ovler-Young/binlog-recovery/releases) 下载预编译二进制文件。
 
 ## 使用步骤
 
@@ -102,4 +107,4 @@ mysql -u username -p database_name < recover_insert.sql
 
 # MariaDB
 mariadb -u username -p database_name < recover_insert.sql
-``` 
+```

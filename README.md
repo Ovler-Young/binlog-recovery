@@ -1,5 +1,7 @@
 # MySQL Binlog DML Recovery Tool
 
+> Recover deleted or updated data from MySQL binlog files with ease
+
 [English](README.md) | [中文](README.CN.md)
 
 A Go language tool for recovering DELETE and UPDATE operations from MySQL binlog.
@@ -18,14 +20,17 @@ This tool can extract deleted or updated data from MySQL binlog and generate cor
 - **DELETE Recovery**: Generate INSERT statements to recover deleted data
 - **UPDATE Recovery**: Generate UPDATE statements to recover data to its previous state
 
-## Build or Download from Release
+## Installation
 
-To build:
+### Option 1: Go Install (Recommended if you have Go environment)
 
-```pwsh
-git clone https://github.com/Ovler-Young/binlog-recovery.git
-go build dml_recovery.go
+```bash
+go install github.com/Ovler-Young/binlog-recovery@latest
 ```
+
+### Option 2: Download from Release (For general users)
+
+Download pre-built binaries from the [releases page](https://github.com/Ovler-Young/binlog-recovery/releases).
 
 ## Usage Steps
 
