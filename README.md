@@ -1,35 +1,37 @@
 # MySQL Binlog DML Recovery Tool
 
-一个用于从MySQL binlog恢复DELETE和UPDATE操作的Go语言工具。
+[English](README.md) | [中文](README.CN.md)
 
-Fork自 <https://github.com/bai1986/1204>，主要修改：
+A Go language tool for recovering DELETE and UPDATE operations from MySQL binlog.
 
-1. 更新正则表达式
-2. 增加特殊字符处理
-3. 增加文档
-4. 增加Github Action及release
+Forked from <https://github.com/bai1986/1204>, main modifications:
 
-## 功能说明
+1. Updated regular expressions
+2. Added special character handling
+3. Added documentation
+4. Added GitHub Actions and releases
 
-本工具可以从MySQL binlog中提取被删除或更新的数据，并生成相应的恢复SQL语句：
+## Features
 
-- **DELETE恢复**：生成INSERT语句来恢复被删除的数据
-- **UPDATE恢复**：生成UPDATE语句来恢复被修改前的数据
+This tool can extract deleted or updated data from MySQL binlog and generate corresponding recovery SQL statements:
 
-## 编译程序 或 从release下载
+- **DELETE Recovery**: Generate INSERT statements to recover deleted data
+- **UPDATE Recovery**: Generate UPDATE statements to recover data to its previous state
 
-若编译：
+## Build or Download from Release
+
+To build:
 
 ```pwsh
 git clone https://github.com/Ovler-Young/binlog-recovery.git
 go build dml_recovery.go
 ```
 
-## 使用步骤
+## Usage Steps
 
-### 1. 准备表结构文件
+### 1. Prepare Table Structure File
 
-创建表结构文件，格式类似CREATE TABLE语句格式，如：
+Create a table structure file in a format similar to CREATE TABLE statement, for example:
 
 ```mysql
 `video_static`
@@ -45,11 +47,11 @@ go build dml_recovery.go
 `priority` int(11)
 ```
 
-### 2. 生成binlog文本文件
+### 2. Generate Binlog Text File
 
-使用mysqlbinlog工具生成可读的binlog文件：
+Use mysqlbinlog tool to generate readable binlog file:
 
-#### 指定时间范围(推荐)
+#### Specify Time Range (Recommended)
 
 ```bash
 mysqlbinlog   --verbose \
@@ -58,20 +60,20 @@ mysqlbinlog   --verbose \
     mysql-bin.00001 > binlog.log
 ```
 
-#### 指定位置范围
+#### Specify Position Range
 
 ```bash
 mysqlbinlog --verbose \
-    --start-position=开始位置 \
-    --stop-position=结束位置 \
+    --start-position=start_position \
+    --stop-position=end_position \
     mysql-bin.00001 > binlog.log
 ```
 
-其中 `--verbose` 不可缺少！！！
+The `--verbose` flag is essential!!!
 
-注意，mariadb-binlog也可行。
+Note: mariadb-binlog is also supported.
 
-### 3. 运行恢复工具
+### 3. Run Recovery Tool
 
 Linux/MacOS
 
@@ -85,14 +87,14 @@ Windows
 binlog-recovery.exe --meta=table_structure.txt --logfile=binlog.log --type=delete --out=recover_insert.sql
 ```
 
-**参数说明：**
+**Parameter Description:**
 
-- `--meta`: 表结构文件路径
-- `--logfile`: binlog文本文件路径
-- `--type`: 恢复类型 (delete 或 update)
-- `--out`: 输出SQL文件路径
+- `--meta`: Table structure file path
+- `--logfile`: Binlog text file path
+- `--type`: Recovery type (delete or update)
+- `--out`: Output SQL file path
 
-### 4. 执行恢复SQL
+### 4. Execute Recovery SQL
 
 ```bash
 # MySQL
