@@ -11,10 +11,13 @@ Fork自 <https://github.com/bai1986/1204>，主要修改：更新正则表达式
 - **DELETE恢复**：生成INSERT语句来恢复被删除的数据
 - **UPDATE恢复**：生成UPDATE语句来恢复被修改前的数据
 
-## 编译程序
+## 编译程序 或 从release下载
+
+若编译：
 
 ```pwsh
-go build recovery.go
+git clone https://github.com/Ovler-Young/binlog-recovery.git
+go build dml_recovery.go
 ```
 
 ## 使用步骤
@@ -65,12 +68,16 @@ mysqlbinlog --verbose \
 
 ### 3. 运行恢复工具
 
-```bash
-# 恢复DELETE操作 (生成INSERT语句)
-./recovery.exe --meta=table_structure.txt --logfile=binlog.log --type=delete --out=recover_insert.sql
+Linux/MacOS
 
-# 恢复UPDATE操作 (生成另一个UPDATE语句)
-./recovery.exe --meta=table_structure.txt --logfile=binlog.log --type=update --out=recover_update.sql
+```bash
+./binlog-recovery --meta=table_structure.txt --logfile=binlog.log --type=delete --out=recover_insert.sql
+```
+
+Windows
+
+```bash
+binlog-recovery.exe --meta=table_structure.txt --logfile=binlog.log --type=delete --out=recover_insert.sql
 ```
 
 **参数说明：**
