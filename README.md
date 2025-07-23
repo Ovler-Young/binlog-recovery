@@ -2,7 +2,7 @@
 
 一个用于从MySQL binlog恢复DELETE和UPDATE操作的Go语言工具。
 
-Fork自 <https://github.com/bai1986/1204>，主要修改：更新正则表达式，增加特殊字符处理
+Fork自 <https://github.com/bai1986/1204>，主要修改：更新正则表达式，增加特殊字符处理，增加文档
 
 ## 功能说明
 
